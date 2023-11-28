@@ -14,7 +14,7 @@ class ProductView(generics.ListAPIView):
 
 class ProductGetView(generics.RetrieveAPIView):
     queryset = models.Product.objects.all()
-    serializer_class = serializers.ProductSerializer
+    serializer_class = serializers.ProductAllSerializer
 
 
 class HistoryAddView(generics.CreateAPIView):

@@ -1,6 +1,20 @@
 from rest_framework import serializers
+from django.contrib.auth import get_user_model
 
 from . import models
+
+User = get_user_model()
+
+
+class UserSerailzier(serializers.ModelSerializer):
+    class Meta:
+        model = User
+        fields = [
+            'id',
+            'username',
+            'first_name',
+            'last_name',
+        ]
 
 
 class LessonHistorySerailizer(serializers.ModelSerializer):
@@ -19,14 +33,24 @@ class LessonSerializer(serializers.ModelSerializer):
             'title',
             'video',
             'duration',
-            # 'video_duration',
             'history',
+        ]
+
+
+class ProductSubscribers(serializers.ModelSerializer):
+    subscribers = UserSerailzier(many=True)
+
+    class Meta:
+        model = models.ProductSubscribers
+        fields = [
+            'product',
+            'subscribers'
         ]
 
 
 class ProductSerializer(serializers.ModelSerializer):
     videos = LessonSerializer(many=True)
-    # history = LessonHistorySerailizer(many=False)
+    # subscribers = ProductSubscribers(many=True)
 
     class Meta:
         model = models.Product
@@ -34,5 +58,19 @@ class ProductSerializer(serializers.ModelSerializer):
             'author',
             'videos',
             'view_count',
-            # 'history',
+            # 'subscribers',
+        ]
+
+
+class ProductAllSerializer(serializers.ModelSerializer):
+    videos = LessonSerializer(many=True)
+    subscribers = ProductSubscribers(many=True)
+
+    class Meta:
+        model = models.Product
+        fields = [
+            'author',
+            'videos',
+            'view_count',
+            'subscribers',
         ]

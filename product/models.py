@@ -12,19 +12,15 @@ class Lesson(models.Model):
     duration = models.IntegerField(blank=True, null=True)
 
     # def save(self, *args, **kwargs):
-    #     # print("http://127.0.0.1:8000" + self.video.url)
-    #     # print(self.video_duration("http://127.0.0.1:8000" + self.video.url))
-    #     # self.duration = self.video_duration(self.video.url)
+    #     print("http://127.0.0.1:8000" + self.video.url)
+    #     print(self.video_duration("http://127.0.0.1:8000" + self.video.url))
+    #     self.duration = self.video_duration(self.video.url)
     #     return super(Lesson, self).save(*args, **kwargs)
 
     # def video_duration(self):
-    #     print("http://127.0.0.1"+self.video.url)
-    #     video = cv2.VideoCapture("http://127.0.0.1"+self.video.url)
+    #     video = cv2.VideoCapture(a)
     #     frames = video.get(cv2.CAP_PROP_FRAME_COUNT)
     #     fps = video.get(cv2.CAP_PROP_FPS)
-    #     print(frames)
-    #     print(self.video.url)
-    #     print(fps)
     #     return round(frames / fps)
 
 
@@ -33,6 +29,12 @@ class Product(models.Model):
     videos = models.ManyToManyField(Lesson)
     view_count = models.IntegerField(default=0)
     # users = models.ManyToManyField('auth.User')
+
+
+class ProductSubscribers(models.Model):
+    product = models.ForeignKey(
+        Product, on_delete=models.CASCADE, related_name='subscribers')
+    subscribers = models.ManyToManyField(User)
 
 
 class StatusChoise(models.Choices):
@@ -46,9 +48,14 @@ class LessonHistory(models.Model):
     lesson = models.ForeignKey(
         Lesson, on_delete=models.CASCADE, related_name='history'
     )
-    duration = models.IntegerField()
-    status = models.CharField(max_length=32, choices=StatusChoise.choices)
+    end_point = models.IntegerField()
+    status = models.BooleanField(default=False)
+
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True, null=True)
 
     def save(self, *args, **kwargs):
-        
+        if self.end_point <= .8 * self.lesson.duration:
+            self.status = False
+        self.status = False
         return super(LessonHistory, self).save(*args, **kwargs)
