@@ -1,3 +1,4 @@
+from collections.abc import Iterable
 import cv2
 from django.db import models
 from django.contrib.auth import get_user_model
@@ -10,6 +11,9 @@ class Lesson(models.Model):
     title = models.CharField(max_length=255)
     video = models.FileField(upload_to='lesson/')
     duration = models.IntegerField(blank=True, null=True)
+
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True, null=True)
 
     # def save(self, *args, **kwargs):
     #     print("http://127.0.0.1:8000" + self.video.url)
@@ -25,29 +29,39 @@ class Lesson(models.Model):
 
 
 class Product(models.Model):
+    title = models.CharField(max_length=255)
     author = models.ForeignKey(User, on_delete=models.CASCADE)
     videos = models.ManyToManyField(Lesson)
     view_count = models.IntegerField(default=0)
     # users = models.ManyToManyField('auth.User')
 
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True, null=True)
+
+    def update_view_count(self):
+        self.view_count += 1
+        self.save()
+
 
 class ProductSubscribers(models.Model):
     product = models.ForeignKey(
         Product, on_delete=models.CASCADE, related_name='subscribers')
-    subscribers = models.ManyToManyField(User)
+    subscribers = models.ForeignKey(
+        User, on_delete=models.CASCADE, related_name='products')
 
-
-class StatusChoise(models.Choices):
-    viewed = 'Viewed'
-    not_viewed = 'Not Viewed'
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True, null=True)
 
 
 class LessonHistory(models.Model):
-    product = models.ForeignKey(Product, on_delete=models.CASCADE)
-    user = models.ForeignKey(User, on_delete=models.CASCADE)
+    product = models.ForeignKey(
+        Product, on_delete=models.CASCADE, related_name='product_history')
+    user = models.ForeignKey(
+        User, on_delete=models.CASCADE, related_name='user_history')
     lesson = models.ForeignKey(
         Lesson, on_delete=models.CASCADE, related_name='history'
     )
+
     end_point = models.IntegerField()
     status = models.BooleanField(default=False)
 
@@ -57,5 +71,5 @@ class LessonHistory(models.Model):
     def save(self, *args, **kwargs):
         if self.end_point <= .8 * self.lesson.duration:
             self.status = False
-        self.status = False
-        return super(LessonHistory, self).save(*args, **kwargs)
+        self.status = True
+        return super().save(*args, **kwargs)
